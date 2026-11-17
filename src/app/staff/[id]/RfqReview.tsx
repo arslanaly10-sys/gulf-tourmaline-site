@@ -9,7 +9,7 @@ import { LEVEL, Pill, STATUS } from "../levels";
 
 const VAT = 0.15;
 const sar = (n: number, ar: boolean) =>
-  new Intl.NumberFormat(ar ? "ar-SA" : "en-SA", { style: "currency", currency: "SAR", maximumFractionDigits: 2 }).format(n);
+  new Intl.NumberFormat(ar ? "ar-SA-u-nu-latn" : "en-SA", { style: "currency", currency: "SAR", maximumFractionDigits: 2 }).format(n);
 
 export function RfqReview({ initial }: { initial: RfqRecord }) {
   const [rfq, setRfq] = useState(initial);
@@ -219,16 +219,16 @@ export function RfqReview({ initial }: { initial: RfqRecord }) {
                         {rfq.quote?.technicalNotes[i] && <p className="mt-1 text-xs text-muted">{rfq.quote.technicalNotes[i]}</p>}
                       </td>
                       <td className="py-3 pe-3"><input aria-label={`Supplier for line ${i + 1}`} value={l.supplier} onChange={(e) => setLine(i, { supplier: e.target.value })} placeholder={ar ? "يحدده الفريق" : "Set by team"} className="h-10 w-40 rounded border border-line px-2" /></td>
-                      <td className="py-3 pe-3">{l.quantity ?? 1} {l.unit ?? ""}</td>
+                      <td className="py-3 pe-3">{l.quantity ?? 1} {ar && (!l.unit || l.unit === "pcs") ? "قطعة" : l.unit ?? ""}</td>
                       <td className="py-3 pe-3"><input aria-label={`Unit price for line ${i + 1}`} type="number" min={0} step="0.01" value={l.unitPrice ?? ""} onChange={(e) => setLine(i, { unitPrice: e.target.value === "" ? null : Number(e.target.value) })} className="h-10 w-32 rounded border border-line px-2" dir="ltr" /></td>
                       <td className="py-3 text-end" dir="ltr">{l.unitPrice === null ? "—" : sar(l.unitPrice * (l.quantity ?? 1), ar)}</td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot className="text-sm">
-                  <tr><td colSpan={5} className="pt-4 text-end text-muted">{ar ? "المجموع قبل الضريبة" : "Subtotal"}</td><td className="pt-4 text-end" dir="ltr">{sar(subtotal, ar)}</td></tr>
-                  <tr><td colSpan={5} className="text-end text-muted">{ar ? "ضريبة القيمة المضافة 15%" : "VAT 15%"}</td><td className="text-end" dir="ltr">{sar(subtotal * VAT, ar)}</td></tr>
-                  <tr className="font-semibold"><td colSpan={5} className="pt-2 text-end">{ar ? "الإجمالي" : "Total"}</td><td className="pt-2 text-end" dir="ltr">{sar(subtotal * (1 + VAT), ar)}</td></tr>
+                  <tr><td colSpan={5} className="pt-4 pe-6 text-end text-muted">{ar ? "المجموع قبل الضريبة" : "Subtotal"}</td><td className="pt-4 text-end" dir="ltr">{sar(subtotal, ar)}</td></tr>
+                  <tr><td colSpan={5} className="pe-6 text-end text-muted">{ar ? "ضريبة القيمة المضافة 15%" : "VAT 15%"}</td><td className="text-end" dir="ltr">{sar(subtotal * VAT, ar)}</td></tr>
+                  <tr className="font-semibold"><td colSpan={5} className="pt-2 pe-6 text-end">{ar ? "الإجمالي" : "Total"}</td><td className="pt-2 text-end" dir="ltr">{sar(subtotal * (1 + VAT), ar)}</td></tr>
                 </tfoot>
               </table>
             </div>

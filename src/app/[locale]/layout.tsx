@@ -54,7 +54,7 @@ export default async function LocaleLayout({
         <SiteHeader locale={locale} />
         <main id="main">{children}</main>
         <SiteFooter locale={locale} />
-        <AssistantLauncher locale={locale} />
+        <AssistantLauncher locale={locale} demo={!process.env.ANTHROPIC_API_KEY} />
       </body>
     </html>
   );

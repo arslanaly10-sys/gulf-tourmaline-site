@@ -26,6 +26,11 @@ export default async function StaffHome() {
             <div><dt className="text-muted">For a specialist</dt><dd className="text-2xl font-semibold">{count("specialist")}</dd></div>
           </dl>
         </div>
+        {!process.env.ANTHROPIC_API_KEY && (
+          <p className="mt-6 rounded-md bg-warn-bg px-4 py-3 text-sm text-warn">
+            Demo mode: no ANTHROPIC_API_KEY is set, so requests are processed by keyword rules instead of AI. Add the key in Vercel and redeploy to switch to Claude.
+          </p>
+        )}
         <div className="mt-8 overflow-x-auto rounded-xl border border-line bg-card">
           <table className="w-full min-w-[760px] text-left text-sm">
             <thead className="bg-surface text-muted">

@@ -1,4 +1,5 @@
 import { extractRfq, matchRfq } from "@/lib/ai";
+import { analyze, demoMatch, isDemo, pdfTexts } from "@/lib/demo";
 import { parseConversation } from "@/lib/limits";
 import { nextRfqId, saveRfq } from "@/lib/store";
 import type { RfqRecord } from "@/lib/types";
@@ -30,13 +31,16 @@ export async function POST(req: Request) {
   };
 
   try {
-    rfq.extraction = await extractRfq(conv.turns, conv.pdfs);
+    const demo = isDemo();
+    const analysis = demo ? analyze(conv.turns, await pdfTexts(conv.pdfs)) : null;
+    if (demo) rfq.log.push({ at: new Date().toISOString(), text: "Demo mode: processed by keyword rules, not AI" });
+    rfq.extraction = analysis ? analysis.extraction : await extractRfq(conv.turns, conv.pdfs);
     rfq.log.push({
       at: new Date().toISOString(),
       text: `Extracted ${rfq.extraction.items.length} item(s)`,
     });
     await saveRfq(rfq);
-    rfq.matches = await matchRfq(rfq.extraction);
+    rfq.matches = analysis ? demoMatch(analysis) : await matchRfq(rfq.extraction);
     rfq.status = "matched";
     const flagged = rfq.matches.filter((m) => m.level === "specialist").length;
     rfq.log.push({

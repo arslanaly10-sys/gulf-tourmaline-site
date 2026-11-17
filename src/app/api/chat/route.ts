@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { streamChat } from "@/lib/ai";
+import { demoReply, isDemo, pdfTexts } from "@/lib/demo";
 import { parseConversation } from "@/lib/limits";
 
 export const runtime = "nodejs";
@@ -10,8 +11,25 @@ export async function POST(req: Request) {
   const conv = body ? parseConversation(body) : null;
   if (!conv) return Response.json({ error: "invalid_request" }, { status: 400 });
 
-  const stream = streamChat(conv.turns, conv.pdfs);
   const encoder = new TextEncoder();
+  const headers = { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" };
+
+  if (isDemo()) {
+    const reply = demoReply(conv.turns, await pdfTexts(conv.pdfs));
+    const words = reply.split(/(\s+)/);
+    const demo = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        for (let i = 0; i < words.length; i += 4) {
+          controller.enqueue(encoder.encode(words.slice(i, i + 4).join("")));
+          await new Promise((r) => setTimeout(r, 25));
+        }
+        controller.close();
+      },
+    });
+    return new Response(demo, { headers: { ...headers, "X-Assistant-Mode": "demo" } });
+  }
+
+  const stream = streamChat(conv.turns, conv.pdfs);
 
   const readable = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -38,7 +56,5 @@ export async function POST(req: Request) {
     },
   });
 
-  return new Response(readable, {
-    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
-  });
+  return new Response(readable, { headers });
 }

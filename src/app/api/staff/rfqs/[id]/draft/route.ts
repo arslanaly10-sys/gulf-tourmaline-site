@@ -1,5 +1,6 @@
 import { draftQuoteNotes } from "@/lib/ai";
 import { isStaff } from "@/lib/auth";
+import { demoQuoteNotes, isDemo } from "@/lib/demo";
 import { getRfq, saveRfq } from "@/lib/store";
 
 export const runtime = "nodejs";
@@ -12,7 +13,7 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string }>
   if (!rfq?.extraction) return Response.json({ error: "not_found" }, { status: 404 });
 
   try {
-    const notes = await draftQuoteNotes(rfq.extraction, rfq.matches, rfq.locale);
+    const notes = isDemo() ? demoQuoteNotes(rfq.extraction, rfq.matches, rfq.locale) : await draftQuoteNotes(rfq.extraction, rfq.matches, rfq.locale);
     rfq.quote = {
       lines: rfq.extraction.items.map((it, i) => ({
         itemIndex: i,

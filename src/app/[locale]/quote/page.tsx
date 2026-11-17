@@ -28,7 +28,7 @@ export default async function Quote({ params }: { params: Promise<{ locale: stri
           </ol>
         </div>
         <div className="h-[min(760px,calc(100svh-8rem))] overflow-hidden rounded-xl border border-line bg-card shadow-sm lg:col-span-8">
-          <AssistantChat locale={locale} />
+          <AssistantChat locale={locale} demo={!process.env.ANTHROPIC_API_KEY} />
         </div>
       </div>
     </section>

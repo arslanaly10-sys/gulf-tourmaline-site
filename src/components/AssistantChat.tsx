@@ -53,7 +53,7 @@ function toBase64(file: File): Promise<string> {
   });
 }
 
-export function AssistantChat({ locale, compact = false }: { locale: Locale; compact?: boolean }) {
+export function AssistantChat({ locale, compact = false, demo = false }: { locale: Locale; compact?: boolean; demo?: boolean }) {
   const d = t(locale).assistant;
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
@@ -197,6 +197,7 @@ export function AssistantChat({ locale, compact = false }: { locale: Locale; com
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div ref={scroller} className={`min-h-0 flex-1 space-y-4 overflow-y-auto p-4 ${compact ? "" : "sm:p-6"}`} aria-live="polite">
+        {demo && <p className="rounded-md bg-warn-bg px-3 py-2 text-xs text-warn">{d.demo}</p>}
         <div className="max-w-[85%] rounded-2xl rounded-ss-sm bg-surface px-4 py-3 leading-relaxed">{d.greeting}</div>
         {turns.map((turn, i) =>
           turn.role === "user" ? (
