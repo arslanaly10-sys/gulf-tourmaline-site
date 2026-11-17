@@ -19,7 +19,7 @@ Claude-powered quotation assistant and a staff desk for reviewing requests.
 
 ## How a request flows
 
-1. A visitor chats (Arabic or English) and can attach up to 3 specification PDFs (8 MB each).
+1. A visitor chats (Arabic or English) and can attach up to 3 specification PDFs (up to 20 MB each, uploaded directly to private storage).
 2. "Send request" extracts a structured RFQ (customer, items, specs, quantities, installation/training, delivery).
 3. Each item is matched to the catalog as **in catalog**, **partial match** or **needs specialist**, with the specs to confirm.
 4. Staff open `/staff`, review, create a quotation draft (cover note + technical notes), add prices and approve.
