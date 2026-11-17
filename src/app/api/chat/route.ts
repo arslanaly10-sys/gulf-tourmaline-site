@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { streamChat } from "@/lib/ai";
 import { demoReply, isDemo, pdfTexts } from "@/lib/demo";
 import { parseConversation } from "@/lib/limits";
+import { resolvePdfs } from "@/lib/files";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -11,11 +12,12 @@ export async function POST(req: Request) {
   const conv = body ? parseConversation(body) : null;
   if (!conv) return Response.json({ error: "invalid_request" }, { status: 400 });
 
+  const pdfs = await resolvePdfs(conv.pdfs);
   const encoder = new TextEncoder();
   const headers = { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" };
 
   if (isDemo()) {
-    const reply = demoReply(conv.turns, await pdfTexts(conv.pdfs));
+    const reply = demoReply(conv.turns, await pdfTexts(pdfs));
     const words = reply.split(/(\s+)/);
     const demo = new ReadableStream<Uint8Array>({
       async start(controller) {
@@ -29,7 +31,7 @@ export async function POST(req: Request) {
     return new Response(demo, { headers: { ...headers, "X-Assistant-Mode": "demo" } });
   }
 
-  const stream = streamChat(conv.turns, conv.pdfs);
+  const stream = streamChat(conv.turns, pdfs);
 
   const readable = new ReadableStream<Uint8Array>({
     async start(controller) {

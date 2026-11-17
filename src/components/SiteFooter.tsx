@@ -73,7 +73,10 @@ export function SiteFooter({ locale }: { locale: Locale }) {
       <div className="border-t border-white/10">
         <div className="wrap flex flex-col gap-2 py-6 text-sm text-white/60 sm:flex-row sm:justify-between">
           <p>© {new Date().getFullYear()} {d.footer.rights}</p>
-          <p>{d.footer.built}</p>
+          <p className="flex flex-wrap gap-x-4">
+            <span>{d.footer.built}</span>
+            <Link href={`/${locale}/privacy`} className="underline hover:text-white">{d.assistant.privacyLink}</Link>
+          </p>
         </div>
       </div>
     </footer>

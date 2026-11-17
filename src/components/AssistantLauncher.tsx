@@ -7,7 +7,7 @@ import { AssistantChat } from "./AssistantChat";
 import { t } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
 
-export function AssistantLauncher({ locale, demo = false }: { locale: Locale; demo?: boolean }) {
+export function AssistantLauncher({ locale, demo = false, uploads = false }: { locale: Locale; demo?: boolean; uploads?: boolean }) {
   const d = t(locale).assistant;
   const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
@@ -48,7 +48,7 @@ export function AssistantLauncher({ locale, demo = false }: { locale: Locale; de
             </button>
           </div>
           <div className="min-h-0 flex-1">
-            <AssistantChat locale={locale} compact demo={demo} />
+            <AssistantChat locale={locale} compact demo={demo} uploads={uploads} />
           </div>
         </div>
       )}

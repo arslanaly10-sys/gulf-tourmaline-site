@@ -10,6 +10,8 @@ export function StaffBar() {
           Sales desk
         </Link>
         <div className="flex items-center gap-2">
+          <Link href="/staff" className="inline-flex min-h-11 items-center px-3 text-sm text-muted hover:text-ink">Requests</Link>
+          <Link href="/staff/metrics" className="inline-flex min-h-11 items-center px-3 text-sm text-muted hover:text-ink">Metrics</Link>
           <Link href="/en" className="inline-flex min-h-11 items-center px-3 text-sm text-muted hover:text-ink">Website</Link>
           <form method="post" action="/api/staff/logout">
             <button className="inline-flex min-h-11 items-center px-3 text-sm text-muted hover:text-ink">Sign out</button>

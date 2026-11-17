@@ -85,7 +85,7 @@ export type RfqRecord = {
   locale: Locale;
   channel: "website";
   transcript: { role: "user" | "assistant"; text: string }[];
-  files: { name: string; size: number }[];
+  files: { name: string; size: number; pathname?: string }[];
   extraction: Extraction | null;
   matches: MatchResult["matches"];
   quote: {
@@ -94,7 +94,11 @@ export type RfqRecord = {
     technicalNotes: string[];
     validityDays: number | null;
     approvedBy: string | null;
+    terms?: string;
   } | null;
+  draftedAt?: string | null;
+  approvedAt?: string | null;
+  revision?: number;
   log: { at: string; text: string }[];
   error: string | null;
 };

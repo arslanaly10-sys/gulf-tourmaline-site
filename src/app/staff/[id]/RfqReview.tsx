@@ -15,6 +15,7 @@ export function RfqReview({ initial }: { initial: RfqRecord }) {
   const [rfq, setRfq] = useState(initial);
   const [lines, setLines] = useState<QuoteLine[]>(initial.quote?.lines ?? []);
   const [cover, setCover] = useState(initial.quote?.coverNote ?? "");
+  const [terms, setTerms] = useState(initial.quote?.terms ?? "");
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const ex = rfq.extraction;
@@ -34,6 +35,7 @@ export function RfqReview({ initial }: { initial: RfqRecord }) {
       if (body.quote) {
         setLines(body.quote.lines);
         setCover(body.quote.coverNote);
+        setTerms(body.quote.terms ?? "");
       }
       return true;
     } catch (e) {
@@ -45,9 +47,9 @@ export function RfqReview({ initial }: { initial: RfqRecord }) {
   }
 
   const draft = () => call("draft", `/api/staff/rfqs/${rfq.id}/draft`, { method: "POST" });
-  const save = () => call("save", `/api/staff/rfqs/${rfq.id}`, { method: "PATCH", body: JSON.stringify({ lines, coverNote: cover }) });
+  const save = () => call("save", `/api/staff/rfqs/${rfq.id}`, { method: "PATCH", body: JSON.stringify({ lines, coverNote: cover, terms }) });
   const approve = async () => {
-    if (await call("save", `/api/staff/rfqs/${rfq.id}`, { method: "PATCH", body: JSON.stringify({ lines, coverNote: cover }) }))
+    if (await call("save", `/api/staff/rfqs/${rfq.id}`, { method: "PATCH", body: JSON.stringify({ lines, coverNote: cover, terms }) }))
       await call("approve", `/api/staff/rfqs/${rfq.id}`, { method: "PATCH", body: JSON.stringify({ status: "approved", approver: "Sales desk" }) });
   };
   const setLine = (i: number, patch: Partial<QuoteLine>) => setLines((ls) => ls.map((l, j) => (j === i ? { ...l, ...patch } : l)));
@@ -101,7 +103,7 @@ export function RfqReview({ initial }: { initial: RfqRecord }) {
             {rfq.files.length > 0 && (
               <ul className="mt-4 space-y-1 border-t border-line pt-3 text-sm">
                 {rfq.files.map((f) => (
-                  <li key={f.name} className="flex items-center gap-2"><FilePdf size={16} className="text-brand-red" aria-hidden /><span dir="ltr">{f.name}</span><span className="text-muted">{Math.round(f.size / 1024)} KB</span></li>
+                  <li key={f.name} className="flex items-center gap-2"><FilePdf size={16} className="shrink-0 text-brand-red" aria-hidden />{f.pathname ? <a className="link" dir="ltr" href={`/api/staff/files?p=${encodeURIComponent(f.pathname)}`} target="_blank" rel="noreferrer">{f.name}</a> : <span dir="ltr">{f.name}</span>}{f.size > 0 && <span className="text-muted">{Math.round(f.size / 1024)} KB</span>}</li>
                 ))}
               </ul>
             )}
@@ -170,7 +172,7 @@ export function RfqReview({ initial }: { initial: RfqRecord }) {
           {rfq.quote && (
             <div className="flex flex-wrap gap-2">
               <button type="button" onClick={save} disabled={!!busy} className="btn btn-secondary min-h-11 text-sm"><FloppyDisk size={18} aria-hidden />{busy === "save" ? "Saving…" : "Save"}</button>
-              <button type="button" onClick={() => window.print()} className="btn btn-secondary min-h-11 text-sm"><Printer size={18} aria-hidden />Print / PDF</button>
+              <a href={`/staff/${rfq.id}/print`} target="_blank" rel="noreferrer" className="btn btn-secondary min-h-11 text-sm"><Printer size={18} aria-hidden />Quote PDF</a>
               <button type="button" onClick={approve} disabled={!!busy || !priced || rfq.status === "approved"} className="btn btn-primary min-h-11 text-sm disabled:opacity-40"><SealCheck size={18} aria-hidden />{rfq.status === "approved" ? "Approved" : "Approve quotation"}</button>
             </div>
           )}
@@ -192,7 +194,7 @@ export function RfqReview({ initial }: { initial: RfqRecord }) {
                 <p className="text-sm text-muted">{ar ? "الدمام، المملكة العربية السعودية · sales@algte.com" : "Dammam, Saudi Arabia · sales@algte.com"}</p>
               </div>
               <div className="text-sm">
-                <p><span className="text-muted">{ar ? "المرجع: " : "Ref: "}</span>{rfq.id}</p>
+                <p><span className="text-muted">{ar ? "المرجع: " : "Ref: "}</span>{rfq.id} · {ar ? "مراجعة" : "Rev."} {rfq.revision ?? 1}</p>
                 <p><span className="text-muted">{ar ? "إلى: " : "To: "}</span>{ex?.customer.organization ?? ex?.customer.contactName ?? "—"}</p>
                 <p><span className="text-muted">{ar ? "صلاحية العرض: " : "Valid for: "}</span>{rfq.quote.validityDays ?? 30} {ar ? "يومًا" : "days"}</p>
               </div>
@@ -232,7 +234,8 @@ export function RfqReview({ initial }: { initial: RfqRecord }) {
                 </tfoot>
               </table>
             </div>
-            <p className="mt-6 text-xs text-muted">{ar ? "الشروط التجارية والتسليم والضمان: تُضاف من القالب المعتمد لدى الشركة." : "Commercial terms, delivery and warranty: added from the company's approved template."}</p>
+            <label htmlFor="terms" className="mt-6 block text-sm font-semibold">{ar ? "الشروط (سطر لكل شرط)" : "Terms (one per line)"}</label>
+            <textarea id="terms" value={terms} onChange={(e) => setTerms(e.target.value)} rows={4} className="mt-1 w-full resize-y rounded-md border border-line p-2 text-sm leading-relaxed focus:border-accent" />
             {rfq.quote.approvedBy && <p className="mt-4 text-sm text-ok">{ar ? "اعتمده: " : "Approved by: "}{rfq.quote.approvedBy}</p>}
           </article>
         )}

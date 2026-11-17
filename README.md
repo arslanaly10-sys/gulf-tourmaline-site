@@ -9,7 +9,10 @@ Claude-powered quotation assistant and a staff desk for reviewing requests.
 | --- | --- | --- |
 | Public site (ar / en) | `src/app/[locale]/…` | Home, product lines (9), line detail, about, training, gallery, careers, contact |
 | Quote page | `/[locale]/quote` | Full-page assistant; the floating "Ask the assistant" button opens the same chat on every page |
-| Staff desk | `/staff` | Password-protected list of requests, technical matching, quotation draft, approval, print/PDF |
+| Staff desk | `/staff` | Password-protected requests, original spec downloads, technical matching, quotation draft with revisions, approval |
+| Quote PDF | `/staff/[id]/print` | A4 quotation on the GTT letterhead (Save as PDF) |
+| Pilot metrics | `/staff/metrics` | Time to draft and approval, match mix, completeness, weekly volume |
+| Privacy | `/[locale]/privacy` | Bilingual privacy notice (PDPL) |
 | AI calls | `src/lib/ai.ts` | Chat (streaming), RFQ extraction, catalog matching, quote notes — Claude Opus 5.5 with server-side refusal fallback |
 | Catalog | `src/lib/catalog.ts` | Product lines, suppliers and clients as published on algte.com and in GTT's profiles |
 | Storage | `src/lib/store.ts` | Vercel Blob (private) in production, `.data/` locally |
@@ -28,7 +31,11 @@ Claude-powered quotation assistant and a staff desk for reviewing requests.
 | --- | --- | --- |
 | `ANTHROPIC_API_KEY` | Vercel → Project → Settings → Environment Variables | Claude API key for the assistant |
 | `STAFF_PASSWORD` | Vercel (set) | Password for `/staff` |
-| `BLOB_READ_WRITE_TOKEN` | Vercel (set by the connected Blob store) | Request storage |
+| `BLOB_READ_WRITE_TOKEN` | Vercel (set by the connected Blob store) | Request and spec-file storage (private, Dubai) |
+| `RESEND_API_KEY`, `NOTIFY_TO`, `MAIL_FROM` | Vercel | New-request alerts to sales and confirmations to customers (skipped until set) |
+| `QUOTE_VAT_NUMBER` | Vercel (optional) | Printed on the quotation letterhead |
+
+Without `ANTHROPIC_API_KEY` the assistant runs in **demo mode** (rules-based matching, clearly labelled).
 
 ## Local development
 

@@ -27,8 +27,14 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string }>
       technicalNotes: notes.technicalNotes,
       validityDays: 30,
       approvedBy: null,
+      terms:
+        rfq.locale === "ar"
+          ? "الأسعار بالريال السعودي ولا تشمل ضريبة القيمة المضافة.\nمدة التسليم: حسب ما هو موضح لكل بند من تاريخ أمر الشراء.\nشروط الدفع: تُحدد عند تأكيد الطلب.\nالضمان: حسب ضمان المصنّع لكل منتج."
+          : "Prices are in Saudi riyals and exclude VAT.\nDelivery: as stated per line from the purchase order date.\nPayment terms: agreed on order confirmation.\nWarranty: as per each manufacturer's warranty.",
     };
     rfq.status = "in_review";
+    rfq.draftedAt = new Date().toISOString();
+    rfq.revision = 1;
     rfq.log.push({ at: new Date().toISOString(), text: "Quotation draft created for review" });
     await saveRfq(rfq);
     return Response.json(rfq);

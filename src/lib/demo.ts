@@ -137,7 +137,7 @@ function splitSegments(text: string) {
     .filter((s) => s.length > 1);
 }
 
-function itemsFrom(text: string, ref: string, fromLast: boolean): Item[] {
+function itemsFrom(text: string, ref: string, fromLast: boolean, strict = false): Item[] {
   const out: Item[] = [];
   for (const seg of splitSegments(text)) {
     if (INFO_RE.test(norm(seg)) && !findLine(seg)) continue;
@@ -146,6 +146,8 @@ function itemsFrom(text: string, ref: string, fromLast: boolean): Item[] {
     const hit = findLine(seg);
     const qty = parseQty(seg, hit);
     if (words > 14 && qty === null) continue;
+    // Documents are noisier than chat: keep lines that name a product with a quantity, or short product lines.
+    if (strict && (qty === null ? !hit || words > 6 : !hit && words > 10)) continue;
     if (!hit && qty === null) continue;
     if (!hit && seg.split(/\s+/).length < 2) continue;
     const specs = [...norm(seg).matchAll(SPEC_RE)].map((m) => m[0].trim()).filter((s, i, a) => a.indexOf(s) === i);
@@ -198,7 +200,7 @@ export function analyze(turns: ChatTurn[], pdfTexts: { name: string; text: strin
 
   const items: Item[] = [];
   userTurns.forEach((t, i) => items.push(...itemsFrom(t.text, "chat", i === userTurns.length - 1)));
-  for (const p of pdfTexts) items.push(...itemsFrom(p.text, p.name, pdfFresh).slice(0, 40));
+  for (const p of pdfTexts) items.push(...itemsFrom(p.text, p.name, pdfFresh, true).slice(0, 40));
   // Merge duplicates of the same line (a later mention updates the quantity).
   const merged: Item[] = [];
   for (const it of items) {
@@ -362,7 +364,7 @@ export function demoQuoteNotes(extraction: Extraction, matches: MatchResult["mat
   const technicalNotes = extraction.items.map((_it, i) => {
     const m = matches.find((x) => x.itemIndex === i);
     if (!m || m.level === "specialist") return ar ? "يؤكد مهندسنا توفر هذا البند ومطابقته قبل الاعتماد النهائي." : "Our engineer will confirm availability and compliance before final approval.";
-    if (m.level === "partial") return ar ? `نقترح بندًا من خط «${lineName(m.productLine)}»، مع تأكيد المواصفة: ${m.specsToConfirm.join("، ") || "المطلوبة"}.` : `Offered from our ${m.productLine} line; specification to confirm: ${m.specsToConfirm.join(", ") || "as requested"}.`;
+    if (m.level === "partial") return ar ? `نقترح بندًا من خط «${lineName(m.productLine)}»، ${m.specsToConfirm.length ? `مع تأكيد المواصفة: ${m.specsToConfirm.join("، ")}` : "مع تأكيد الطراز والمواصفات"}.` : `Offered from our ${m.productLine} line; ${m.specsToConfirm.length ? `specification to confirm: ${m.specsToConfirm.join(", ")}` : "model and specifications to confirm"}.`;
     return ar ? `مطابق ضمن خط «${lineName(m.productLine)}».` : `Matches our ${m.productLine} line.`;
   });
   return { coverNote, technicalNotes };
