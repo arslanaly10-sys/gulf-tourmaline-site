@@ -7,3 +7,8 @@ node_modules/
 graphify-out/cache/
 .data/
 .taste-skill/
+graphify-out/cache/
+graphify-out/.graphify_*
+graphify-out/manifest.json
+graphify-out/cost.json
+**/graphify-out/cache/
